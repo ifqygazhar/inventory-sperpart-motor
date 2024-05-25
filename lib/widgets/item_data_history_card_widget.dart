@@ -156,7 +156,7 @@ class ItemDataHistoryCard extends StatelessWidget {
                 SelectColor.kRed,
               ),
         Text(
-          DateFormat("EEEE, d MMMM yyyy").format(product.date),
+          DateFormat("EEEE, d MMMM yyyy", "id_ID").format(product.date),
           style: GoogleFonts.poppins(
             color: SelectColor.kWhite,
             fontSize: 12,

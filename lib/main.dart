@@ -6,8 +6,11 @@ import 'package:inventory_motor/providers/get_all_product_history_provider.dart'
 import 'package:inventory_motor/providers/get_all_product_provider.dart';
 import 'package:inventory_motor/providers/update_product_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
   runApp(const MyApp());
 }
 

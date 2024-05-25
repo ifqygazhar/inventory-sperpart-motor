@@ -175,8 +175,8 @@ class _FormDataPageState extends State<FormDataPage> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 70);
 
     if (pickedFile != null) {
       setState(() {
