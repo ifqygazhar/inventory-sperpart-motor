@@ -240,7 +240,6 @@ class _FormDataPageState extends State<FormDataPage> {
   }
 
   void _updateProduct() {
-    final provider = Provider.of<UpdateProductProvider>(context, listen: false);
     final productProvider =
         Provider.of<GetAllProductProvider>(context, listen: false);
     final productHistoryProvider =
@@ -249,26 +248,80 @@ class _FormDataPageState extends State<FormDataPage> {
     final updatedProduct = widget.product!.copyWith(
       title: _titleController.text,
       date: DateTime.parse(_dateController.text),
-      status: _selectedStatus!,
       entry: int.parse(_entryController.text),
       exit: int.parse(_exitController.text),
       description: _descriptionController.text,
       image: _selectedImage?.path ?? "",
     );
 
+    final bool entryChanged = updatedProduct.entry != widget.product!.entry;
+    final bool exitChanged = updatedProduct.exit != widget.product!.exit;
+
+    Status newStatus = updatedProduct.status;
+    if (entryChanged && exitChanged) {
+      newStatus = updatedProduct.entry > updatedProduct.exit
+          ? Status.masuk
+          : Status.keluar;
+    } else if (entryChanged) {
+      newStatus = Status.masuk;
+    } else if (exitChanged) {
+      newStatus = Status.keluar;
+    }
+    final updatedProductWithNewStatus =
+        updatedProduct.copyWith(status: newStatus);
+
+    String description = 'Produk telah diperbarui';
+    if (entryChanged && exitChanged) {
+      final int entryDifference = updatedProduct.entry - widget.product!.entry;
+      final int exitDifference = updatedProduct.exit - widget.product!.exit;
+      description +=
+          ' pemasukan sebesar $entryDifference dan pengeluaran sebesar $exitDifference';
+    } else if (entryChanged) {
+      final int entryDifference = updatedProduct.entry - widget.product!.entry;
+      description +=
+          ' dengan melakukan pemasukan sebesar $entryDifference dari total ${updatedProduct.entry - entryDifference}';
+    } else if (exitChanged) {
+      final int exitDifference = updatedProduct.exit - widget.product!.exit;
+      description +=
+          ' dan pengeluaran sebesar $exitDifference dari total ${updatedProduct.exit - exitDifference}';
+    } else {
+      description =
+          'Produk telah diperbarui tidak ada perubahan dalam pemasukan ataupun pengeluaran';
+    }
+
     final updateProductHistory = productHistoryModel.ProductHistory(
       id: '',
       productId: updatedProduct.id,
       title: updatedProduct.title,
       date: updatedProduct.date,
-      status: updatedProduct.status,
-      description: updatedProduct.description,
+      status: newStatus,
+      entry: entryChanged
+          ? updatedProduct.entry - widget.product!.entry
+          : int.parse(_entryController.text),
+      exit: exitChanged
+          ? updatedProduct.exit - widget.product!.exit
+          : int.parse(_exitController.text),
+      description: description,
       image: updatedProduct.image,
     );
 
-    provider
-        .updateProduct(updatedProduct, productProvider, productHistoryProvider,
-            updateProductHistory)
+    runUpdateProduct(updatedProductWithNewStatus, updateProductHistory,
+        productProvider, productHistoryProvider);
+  }
+
+  Future<Null> runUpdateProduct(
+      Product product,
+      productHistoryModel.ProductHistory productHistory,
+      GetAllProductProvider productProvider,
+      GetAllProductHistoryProvider productHistoryProvider) {
+    final provider = Provider.of<UpdateProductProvider>(context, listen: false);
+    return provider
+        .updateProduct(
+      product,
+      productProvider,
+      productHistoryProvider,
+      productHistory,
+    )
         .then((_) {
       if (provider.error == null) {
         productProvider.fetchProducts();

@@ -34,6 +34,10 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppbarWidget.myAppBar([
         IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.info),
+        ),
+        IconButton(
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(

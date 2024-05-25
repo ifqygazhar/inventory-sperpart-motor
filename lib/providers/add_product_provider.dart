@@ -43,6 +43,8 @@ class AddProductProvider with ChangeNotifier {
         title: title,
         date: date,
         status: Status.values.firstWhere((e) => e.name == status.name),
+        entry: entry,
+        exit: exit,
         description: description,
         image: image,
       );
@@ -61,6 +63,8 @@ class AddProductProvider with ChangeNotifier {
     required String title,
     required DateTime date,
     required Status status,
+    required int entry,
+    required int exit,
     required String description,
     required String image,
   }) async {
@@ -75,6 +79,8 @@ class AddProductProvider with ChangeNotifier {
         title: title,
         date: date,
         status: status,
+        entry: entry,
+        exit: exit,
         description: description,
         image: image,
       );

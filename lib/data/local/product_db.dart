@@ -44,6 +44,8 @@ class ProductDatabase {
       title TEXT,
       date TEXT,
       status TEXT,
+      entry INTEGER, 
+      exit INTEGER, 
       description TEXT,
       image TEXT,
       FOREIGN KEY (product_id) REFERENCES products(id)
@@ -72,8 +74,8 @@ class ProductDatabase {
     final db = await instance.database;
 
     await db.transaction((txn) async {
-      await txn.delete('product_history',
-          where: 'product_id = ?', whereArgs: [id]); //bagian ini
+      await txn
+          .delete('product_history', where: 'product_id = ?', whereArgs: [id]);
       await txn.delete('products', where: 'id = ?', whereArgs: [id]);
     });
   }

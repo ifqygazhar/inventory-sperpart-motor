@@ -45,7 +45,10 @@ class ItemDataCardWidget extends StatelessWidget {
               color: SelectColor.kPrimary,
               fontSize: 15,
             ),
-          )
+          ),
+          const SizedBox(
+            height: 12,
+          ),
         ],
       ));
     }

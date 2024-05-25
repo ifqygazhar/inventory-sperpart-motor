@@ -7,6 +7,8 @@ class ProductHistory {
     required this.title,
     required this.date,
     required this.status,
+    required this.entry,
+    required this.exit,
     required this.description,
     required this.image,
   });
@@ -16,6 +18,8 @@ class ProductHistory {
   final String title;
   final DateTime date;
   final Status status;
+  final int entry;
+  final int exit;
   final String description;
   final String image;
 
@@ -25,6 +29,8 @@ class ProductHistory {
     String? title,
     DateTime? date,
     Status? status,
+    int? entry,
+    int? exit,
     String? description,
     String? image,
   }) {
@@ -34,6 +40,8 @@ class ProductHistory {
       title: title ?? this.title,
       date: date ?? this.date,
       status: status ?? this.status,
+      entry: entry ?? this.entry,
+      exit: exit ?? this.exit,
       description: description ?? this.description,
       image: image ?? this.image,
     );
@@ -55,6 +63,8 @@ class ProductHistory {
       'title': title,
       'date': date.toIso8601String(),
       'status': statusToString(status),
+      'entry': entry,
+      'exit': exit,
       'description': description,
       'image': image,
     };
@@ -67,6 +77,8 @@ class ProductHistory {
       title: map['title'],
       date: DateTime.parse(map['date']),
       status: statusFromString(map['status']),
+      entry: map['entry'],
+      exit: map['exit'],
       description: map['description'],
       image: map['image'],
     );
@@ -79,6 +91,8 @@ class ProductHistory {
       title,
       date.toIso8601String(),
       statusToString(status),
+      entry,
+      exit,
       description,
       image,
     ];
