@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:inventory_motor/pages/about_page.dart';
 import 'package:inventory_motor/pages/form_data_page.dart';
 import 'package:inventory_motor/pages/history_page.dart';
 import 'package:inventory_motor/providers/get_all_product_provider.dart';
@@ -34,7 +35,12 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppbarWidget.myAppBar([
         IconButton(
-          onPressed: () {},
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AboutPage(),
+            ),
+          ),
           icon: const Icon(Icons.info),
         ),
         IconButton(

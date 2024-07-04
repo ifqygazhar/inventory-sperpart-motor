@@ -8,3 +8,5 @@ class SelectColor {
   static const Color kGreen = Color(0xFF2A9174);
   static const Color kRed = Color(0xFFF95762);
 }
+
+
