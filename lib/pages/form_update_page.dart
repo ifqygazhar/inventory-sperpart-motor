@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:inventory_motor/models/product_history.dart'
@@ -12,46 +11,40 @@ import 'package:inventory_motor/widgets/appbar_widget.dart';
 import 'package:inventory_motor/widgets/button_widget.dart';
 import 'package:inventory_motor/widgets/rounded_textfield_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:inventory_motor/providers/add_product_provider.dart';
 import 'package:inventory_motor/providers/update_product_provider.dart';
 import 'package:inventory_motor/models/product.dart';
 
-class FormDataPage extends StatefulWidget {
-  final Product? product;
-  final productHistoryModel.ProductHistory? productHistory;
+class FormUpdatePage extends StatefulWidget {
+  final Product product;
 
-  const FormDataPage({
-    super.key,
-    this.product,
-    this.productHistory,
-  });
+  const FormUpdatePage({super.key, required this.product});
 
   @override
-  State<FormDataPage> createState() => _FormDataPageState();
+  State<FormUpdatePage> createState() => _FormUpdatePageState();
 }
 
-class _FormDataPageState extends State<FormDataPage> {
+class _FormUpdatePageState extends State<FormUpdatePage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _entryController = TextEditingController();
   final TextEditingController _exitController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _totalController = TextEditingController();
   Status? _selectedStatus;
   File? _selectedImage;
 
   @override
   void initState() {
     super.initState();
-    if (widget.product != null) {
-      _titleController.text = widget.product!.title;
-      _dateController.text =
-          widget.product!.date.toIso8601String().split('T').first;
-      _entryController.text = widget.product!.entry.toString();
-      _exitController.text = widget.product!.exit.toString();
-      _descriptionController.text = widget.product!.description;
-      _selectedStatus = widget.product!.status;
-      _selectedImage = File(widget.product!.image);
-    }
+    _titleController.text = widget.product.title;
+    _dateController.text =
+        widget.product.date.toIso8601String().split('T').first;
+    _entryController.text = widget.product.entry.toString();
+    _exitController.text = widget.product.exit.toString();
+    _descriptionController.text = widget.product.description;
+    _selectedStatus = widget.product.status;
+    _selectedImage = File(widget.product.image);
+    _totalController.text = widget.product.total.toString();
   }
 
   @override
@@ -62,14 +55,14 @@ class _FormDataPageState extends State<FormDataPage> {
     _entryController.dispose();
     _exitController.dispose();
     _descriptionController.dispose();
+    _totalController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppbarWidget.myAppBar(
-          null, widget.product == null ? "Tambah Produk" : "Update Produk"),
+      appBar: AppbarWidget.myAppBar(null, "Update Produk"),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -92,11 +85,7 @@ class _FormDataPageState extends State<FormDataPage> {
                   child: Text(Product.statusToString(status)),
                 );
               }).toList(),
-              onChanged: (Status? newValue) {
-                setState(() {
-                  _selectedStatus = newValue!;
-                });
-              },
+              onChanged: null,
               decoration: InputDecoration(
                 labelText: 'Status',
                 border: OutlineInputBorder(
@@ -104,14 +93,21 @@ class _FormDataPageState extends State<FormDataPage> {
                 ),
               ),
             ),
+            if (_selectedStatus == Status.masuk)
+              RoundedTextField(
+                controller: _entryController,
+                labelText: 'Jumlah Masuk',
+                keyboardType: TextInputType.number,
+              ),
+            if (_selectedStatus == Status.keluar)
+              RoundedTextField(
+                controller: _exitController,
+                labelText: 'Jumlah Keluar',
+                keyboardType: TextInputType.number,
+              ),
             RoundedTextField(
-              controller: _entryController,
-              labelText: 'Jumlah Masuk',
-              keyboardType: TextInputType.number,
-            ),
-            RoundedTextField(
-              controller: _exitController,
-              labelText: 'Jumlah Keluar',
+              controller: _totalController,
+              labelText: 'Total Saat Ini',
               keyboardType: TextInputType.number,
             ),
             RoundedTextField(
@@ -147,10 +143,10 @@ class _FormDataPageState extends State<FormDataPage> {
             SizedBox(
               width: double.infinity,
               child: ButtonWidget.myButton(
-                widget.product == null ? "Tambah Produk" : "Update Produk",
+                "Update Produk",
                 SelectColor.kPrimary,
                 SelectColor.kWhite,
-                () => _submitForm(),
+                _submitForm,
               ),
             ),
           ],
@@ -184,17 +180,25 @@ class _FormDataPageState extends State<FormDataPage> {
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Tidak ada gambar/foto yang dipilih")),
+        const SnackBar(content: Text("Tidak ada gambar/foto yang dipilih")),
       );
     }
   }
 
   void _submitForm() {
     if (_formIsValid()) {
-      if (widget.product == null) {
-        _addProduct();
+      if (_selectedStatus == Status.masuk) {
+        _updateProduct(Status.masuk);
       } else {
-        _updateProduct();
+        if (int.parse(_exitController.text) >
+            int.parse(_totalController.text)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text("Pengeluaran tidak boleh melebihi total")),
+          );
+        } else {
+          _updateProduct(Status.keluar);
+        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,58 +208,50 @@ class _FormDataPageState extends State<FormDataPage> {
   }
 
   bool _formIsValid() {
-    return _titleController.text.isNotEmpty &&
-        _dateController.text.isNotEmpty &&
-        _entryController.text.isNotEmpty &&
-        _exitController.text.isNotEmpty &&
-        _descriptionController.text.isNotEmpty &&
-        (_selectedImage != null);
+    if (_selectedStatus == Status.masuk) {
+      return _titleController.text.isNotEmpty &&
+          _dateController.text.isNotEmpty &&
+          _entryController.text.isNotEmpty &&
+          _descriptionController.text.isNotEmpty &&
+          _totalController.text.isNotEmpty &&
+          (_selectedImage != null);
+    } else {
+      return _titleController.text.isNotEmpty &&
+          _dateController.text.isNotEmpty &&
+          _exitController.text.isNotEmpty &&
+          _descriptionController.text.isNotEmpty &&
+          _totalController.text.isNotEmpty &&
+          (_selectedImage != null);
+    }
   }
 
-  void _addProduct() {
-    final provider = Provider.of<AddProductProvider>(context, listen: false);
-
-    provider
-        .addProduct(
-      title: _titleController.text,
-      date: DateTime.parse(_dateController.text),
-      status: _selectedStatus!,
-      entry: int.parse(_entryController.text),
-      exit: int.parse(_exitController.text),
-      description: _descriptionController.text,
-      image: _selectedImage?.path ?? "",
-    )
-        .then((_) {
-      if (provider.error == null) {
-        final productProvider =
-            Provider.of<GetAllProductProvider>(context, listen: false);
-        productProvider.fetchProducts();
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(provider.error!)),
-        );
-      }
-    });
-  }
-
-  void _updateProduct() {
+  void _updateProduct(Status status) {
     final productProvider =
         Provider.of<GetAllProductProvider>(context, listen: false);
     final productHistoryProvider =
         Provider.of<GetAllProductHistoryProvider>(context, listen: false);
 
-    final updatedProduct = widget.product!.copyWith(
+    int total;
+    if (status == Status.masuk) {
+      total =
+          int.parse(_entryController.text) + int.parse(_totalController.text);
+    } else {
+      total =
+          int.parse(_totalController.text) - int.parse(_exitController.text);
+    }
+
+    final updatedProduct = widget.product.copyWith(
       title: _titleController.text,
       date: DateTime.parse(_dateController.text),
       entry: int.parse(_entryController.text),
       exit: int.parse(_exitController.text),
       description: _descriptionController.text,
       image: _selectedImage?.path ?? "",
+      total: total,
     );
 
-    final bool entryChanged = updatedProduct.entry != widget.product!.entry;
-    final bool exitChanged = updatedProduct.exit != widget.product!.exit;
+    final bool entryChanged = updatedProduct.entry != widget.product.entry;
+    final bool exitChanged = updatedProduct.exit != widget.product.exit;
 
     Status newStatus = updatedProduct.status;
     if (entryChanged && exitChanged) {
@@ -272,18 +268,18 @@ class _FormDataPageState extends State<FormDataPage> {
 
     String description = 'Produk telah diperbarui';
     if (entryChanged && exitChanged) {
-      final int entryDifference = updatedProduct.entry - widget.product!.entry;
-      final int exitDifference = updatedProduct.exit - widget.product!.exit;
+      final int entryDifference = updatedProduct.entry - widget.product.entry;
+      final int exitDifference = updatedProduct.exit - widget.product.exit;
       description +=
           ' pemasukan sebesar $entryDifference dan pengeluaran sebesar $exitDifference';
     } else if (entryChanged) {
-      final int entryDifference = updatedProduct.entry - widget.product!.entry;
+      final int entryDifference = updatedProduct.entry - widget.product.entry;
       description +=
-          ' dengan melakukan pemasukan sebesar $entryDifference dari total ${updatedProduct.entry - entryDifference}';
+          ' dengan melakukan pemasukan sebesar $entryDifference dari total masuk ${updatedProduct.entry - entryDifference}';
     } else if (exitChanged) {
-      final int exitDifference = updatedProduct.exit - widget.product!.exit;
+      final int exitDifference = updatedProduct.exit - widget.product.exit;
       description +=
-          ' dan pengeluaran sebesar $exitDifference dari total ${updatedProduct.exit - exitDifference}';
+          ' dan pengeluaran sebesar $exitDifference dari total keluar ${updatedProduct.exit - exitDifference}';
     } else {
       description =
           'Produk telah diperbarui tidak ada perubahan dalam pemasukan ataupun pengeluaran';
@@ -296,10 +292,10 @@ class _FormDataPageState extends State<FormDataPage> {
       date: updatedProduct.date,
       status: newStatus,
       entry: entryChanged
-          ? updatedProduct.entry - widget.product!.entry
+          ? updatedProduct.entry - widget.product.entry
           : int.parse(_entryController.text),
       exit: exitChanged
-          ? updatedProduct.exit - widget.product!.exit
+          ? updatedProduct.exit - widget.product.exit
           : int.parse(_exitController.text),
       description: description,
       image: updatedProduct.image,

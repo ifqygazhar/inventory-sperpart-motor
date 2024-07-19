@@ -1,17 +1,6 @@
 import 'package:inventory_motor/utils/status.dart';
 
 class Product {
-  const Product({
-    required this.id,
-    required this.title,
-    required this.date,
-    required this.status,
-    required this.entry,
-    required this.exit,
-    required this.description,
-    required this.image,
-  });
-
   final String id;
   final String title;
   final DateTime date;
@@ -20,6 +9,19 @@ class Product {
   final int exit;
   final String description;
   final String image;
+  final int total;
+
+  Product({
+    required this.id,
+    required this.title,
+    required this.date,
+    required this.status,
+    required this.entry,
+    required this.exit,
+    required this.description,
+    required this.image,
+    required this.total,
+  });
 
   Product copyWith({
     String? id,
@@ -30,6 +32,7 @@ class Product {
     int? exit,
     String? description,
     String? image,
+    int? total,
   }) {
     return Product(
       id: id ?? this.id,
@@ -40,16 +43,8 @@ class Product {
       exit: exit ?? this.exit,
       description: description ?? this.description,
       image: image ?? this.image,
+      total: total ?? this.total,
     );
-  }
-
-  static Status statusFromString(String status) {
-    return Status.values
-        .firstWhere((e) => e.toString().split('.').last == status);
-  }
-
-  static String statusToString(Status status) {
-    return status.toString().split('.').last;
   }
 
   Map<String, dynamic> toMap() {
@@ -57,25 +52,31 @@ class Product {
       'id': id,
       'title': title,
       'date': date.toIso8601String(),
-      'status': statusToString(status),
+      'status': status.toString(),
       'entry': entry,
       'exit': exit,
       'description': description,
       'image': image,
+      'total': total,
     };
   }
 
-  factory Product.fromMap(Map<String, dynamic> map) {
+  static Product fromMap(Map<String, dynamic> map) {
     return Product(
       id: map['id'],
       title: map['title'],
       date: DateTime.parse(map['date']),
-      status: statusFromString(map['status']),
+      status: Status.values.firstWhere((e) => e.toString() == map['status']),
       entry: map['entry'],
       exit: map['exit'],
       description: map['description'],
       image: map['image'],
+      total: map['total'],
     );
+  }
+
+  static String statusToString(Status status) {
+    return status.toString().split('.').last;
   }
 
   List<dynamic> toList() {
@@ -88,6 +89,7 @@ class Product {
       exit,
       description,
       image,
+      total,
     ];
   }
 }

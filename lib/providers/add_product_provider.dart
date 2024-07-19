@@ -19,6 +19,7 @@ class AddProductProvider with ChangeNotifier {
     required int exit,
     required String description,
     required String image,
+    required int total,
   }) async {
     _isLoading = true;
     _error = null;
@@ -34,6 +35,7 @@ class AddProductProvider with ChangeNotifier {
         exit: exit,
         description: description,
         image: image,
+        total: total, // Set total pada produk
       );
 
       final productId = await ProductDatabase.instance.insertProduct(product);
@@ -74,7 +76,7 @@ class AddProductProvider with ChangeNotifier {
 
     try {
       final productHistory = ProductHistory(
-        id: '', // ID will be set in the database layer
+        id: '', // ID akan di-set di layer database
         productId: productId,
         title: title,
         date: date,

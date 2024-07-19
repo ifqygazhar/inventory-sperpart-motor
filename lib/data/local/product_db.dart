@@ -33,7 +33,8 @@ class ProductDatabase {
       entry INTEGER, 
       exit INTEGER, 
       description TEXT,
-      image TEXT
+      image TEXT,
+      total INTEGER
     )
     ''');
 
@@ -51,6 +52,27 @@ class ProductDatabase {
       FOREIGN KEY (product_id) REFERENCES products(id)
     )
     ''');
+
+    await db.execute('''
+    CREATE TABLE pin (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      pin INTEGER NOT NULL
+    )
+    ''');
+  }
+
+  Future<void> insertPin(int pin) async {
+    final db = await instance.database;
+    await db.insert('pin', {'pin': pin});
+  }
+
+  Future<int?> getPin() async {
+    final db = await instance.database;
+    final result = await db.query('pin', limit: 1);
+    if (result.isNotEmpty) {
+      return result.first['pin'] as int?;
+    }
+    return null;
   }
 
   Future<String> insertProduct(Product product) async {

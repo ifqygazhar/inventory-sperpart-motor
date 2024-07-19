@@ -7,7 +7,7 @@ class ButtonWidget {
     String title,
     Color backgroundColor,
     Color foregroundColor,
-    Function() onTap,
+    dynamic Function()? onTap,
   ) {
     return ElevatedButton(
       onPressed: onTap,

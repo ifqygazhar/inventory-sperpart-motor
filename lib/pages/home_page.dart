@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:inventory_motor/pages/about_page.dart';
-import 'package:inventory_motor/pages/form_data_page.dart';
+import 'package:inventory_motor/pages/form_entry_page.dart';
+import 'package:inventory_motor/pages/form_exit_page.dart';
 import 'package:inventory_motor/pages/history_page.dart';
 import 'package:inventory_motor/providers/get_all_product_provider.dart';
 import 'package:inventory_motor/utils/color.dart';
@@ -81,13 +82,27 @@ class _HomePageState extends State<HomePage> {
               SizedBox(
                 width: double.infinity,
                 child: ButtonWidget.myButton(
-                  "Tambah produk",
+                  "Tambah Stok Masuk Produk",
                   SelectColor.kPrimary,
                   SelectColor.kWhite,
                   () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const FormDataPage(),
+                      builder: (context) => const FormEntryPage(),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: ButtonWidget.myButton(
+                  "Tambah Stok Keluar Produk",
+                  SelectColor.kPrimary,
+                  SelectColor.kWhite,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FormExitPage(),
                     ),
                   ),
                 ),

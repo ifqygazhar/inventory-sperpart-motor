@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_motor/pages/home_page.dart';
+
+import 'package:inventory_motor/pages/pin_page.dart';
 import 'package:inventory_motor/providers/add_product_provider.dart';
 import 'package:inventory_motor/providers/delete_product_provider.dart';
 import 'package:inventory_motor/providers/get_all_product_history_provider.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: HomePage(),
+        home: PinPage(),
       ),
     );
   }
